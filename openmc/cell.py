@@ -114,6 +114,7 @@ class Cell(IDManagerMixin):
         self._num_instances = None
         self._volume = None
         self._atoms = None
+        self._kill = False
 
     def __contains__(self, point):
         if self.region is None:
@@ -143,6 +144,7 @@ class Cell(IDManagerMixin):
                                                   self.temperature)
         string += '{: <16}=\t{}\n'.format('\tTranslation', self.translation)
         string += '{: <16}=\t{}\n'.format('\tVolume', self.volume)
+        string += '{: <16}=\t{}\n'.format('\tKill', self.kill)
 
         return string
 
@@ -353,6 +355,14 @@ class Cell(IDManagerMixin):
                 'Number of cell instances have not been determined. Call the '
                 'Geometry.determine_paths() method.')
         return self._num_instances
+
+    @property
+    def kill(self):
+        return self._kill
+
+    @kill.setter
+    def kill(self, value: bool):
+        self._kill = value
 
     def add_volume_information(self, volume_calc):
         """Add volume information to a cell.
@@ -658,6 +668,9 @@ class Cell(IDManagerMixin):
 
         if self.volume is not None:
             element.set("volume", str(self.volume))
+
+        if self.kill:
+            element.set("kill", "true")
 
         return element
 
