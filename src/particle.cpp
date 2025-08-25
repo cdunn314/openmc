@@ -533,6 +533,21 @@ void Particle::pht_secondary_particles()
 void Particle::cross_surface(const Surface& surf)
 {
 
+  // --- Check if particles should be killed upon entering cell ---
+  auto check_kill_cell = [&](int32_t cell_idx) {
+    if (cell_idx != C_NONE) {
+      auto* csg_cell = dynamic_cast<CSGCell*>(model::cells[cell_idx].get());
+      if (csg_cell && csg_cell->kill()) {
+        this->wgt() = 0.0;
+        if (settings::verbosity >= 10 || trace()) {
+          write_message(1, "    Particle killed by entering cell {}", csg_cell->id_);
+        }
+        return true;
+      }
+    }
+    return false;
+  };
+
   if (settings::verbosity >= 10 || trace()) {
     write_message(1, "    Crossing surface {}", surf.id_);
   }
@@ -576,9 +591,13 @@ void Particle::cross_surface(const Surface& surf)
 #endif
 
   bool verbose = settings::verbosity >= 10 || trace();
+
+  // Check if particle is in a neighboring cell
   if (neighbor_list_find_cell(*this, verbose)) {
+    // If cell is a kill cell, set particle weight to 0.
+    if (check_kill_cell(lowest_coord().cell())) return;
     return;
-  }
+}
 
   // ==========================================================================
   // COULDN'T FIND PARTICLE IN NEIGHBORING CELLS, SEARCH ALL CELLS
@@ -586,6 +605,11 @@ void Particle::cross_surface(const Surface& surf)
   // Remove lower coordinate levels
   n_coord() = 1;
   bool found = exhaustive_find_cell(*this, verbose);
+
+  if (found) {
+    // If cell is a kill cell, set particle weight to 0.
+    if (check_kill_cell(lowest_coord().cell())) return;
+  }
 
   if (settings::run_mode != RunMode::PLOTTING && (!found)) {
     // If a cell is still not found, there are two possible causes: 1) there is
