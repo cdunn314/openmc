@@ -342,7 +342,20 @@ CSGCell::CSGCell(pugi::xml_node cell_node)
     for (auto& T : sqrtkT_) {
       T = std::sqrt(K_BOLTZMANN * T);
     }
-  }
+
+    // Read in whether or not to kill particles in cell (kill_cell branch)
+    if (check_for_node(cell_node, "kill")) {
+      std::string kill_str;
+      if (cell_node.attribute("kill")) {
+        kill_str = cell_node.attribute("kill").value();
+      } else {
+        kill_str = get_node_value(cell_node, "kill");
+      }
+      std::transform(kill_str.begin(), kill_str.end(), kill_str.begin(), ::tolower);
+      if (kill_str == "true" || kill_str == "1" || kill_str == "yes") {
+        kill_ = true;
+      }
+}
 
   // Read the region specification.
   std::string region_spec;

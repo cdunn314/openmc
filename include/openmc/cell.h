@@ -393,6 +393,9 @@ public:
 
   virtual GeometryType geom_type() const override { return GeometryType::CSG; }
 
+  // Add kill cell method accessor (new in kill_cell branch)
+  bool kill() const { return kill_; }
+
 protected:
   //! Returns the beginning position of a parenthesis block (immediately before
   //! two surface tokens) in the RPN given a starting position at the end of
@@ -404,6 +407,7 @@ protected:
 
 private:
   Region region_;
+  bool kill_ = false; // cells default to not killed (kill_cell branch)
 };
 
 //==============================================================================
