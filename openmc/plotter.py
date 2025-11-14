@@ -135,6 +135,7 @@ def plot_xs(
     orders: Iterable[int] | None = None,
     divisor_orders: Iterable[int] | None = None,
     energy_axis_units: str = "eV",
+    plot_kwargs: dict | None = None,
     **kwargs,
 ) -> "plt.Figure" | None:
     """Creates a figure of continuous-energy cross sections for this item.
@@ -176,6 +177,8 @@ def plot_xs(
         multi-group data.
     divisor_orders : Iterable of Integral, optional
         Same as orders, but for divisor_types
+    plot_kwargs : dict, optional
+        All keyword arguments passed to matplotlib.pyplot.plot()
     **kwargs :
         All keyword arguments are passed to
         :func:`matplotlib.pyplot.figure`.
@@ -208,6 +211,9 @@ def plot_xs(
         ax = axis
 
     all_types = []
+
+    if plot_kwargs is None:
+        plot_kwargs = {}
 
     for this, types in reactions.items():
         all_types = all_types + types
@@ -261,7 +267,8 @@ def plot_xs(
         for i in range(len(data)):
             data[i, :] = np.nan_to_num(data[i, :])
             if np.sum(data[i, :]) > 0.:
-                ax.plot(E, data[i, :], label=_get_legend_label(this, types[i]))
+                ax.plot(E, data[i, :], label=_get_legend_label(this, types[i]),
+                        **plot_kwargs)
 
     # Set to loglog or semilogx depending on if we are plotting a data
     # type which we expect to vary linearly

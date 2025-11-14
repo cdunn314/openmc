@@ -593,7 +593,9 @@ void Particle::cross_surface(const Surface& surf)
   bool verbose = settings::verbosity >= 10 || trace();
 
   // Check if particle is in a neighboring cell
-  if (neighbor_list_find_cell(*this, verbose)) {
+  bool found_new_cell = neighbor_list_find_cell(*this, verbose);
+
+  if (found_new_cell) {
     // If cell is a kill cell, set particle weight to 0.
     if (check_kill_cell(lowest_coord().cell())) return;
     return;
